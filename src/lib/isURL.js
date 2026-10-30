@@ -1,11 +1,22 @@
-import assertString from './util/assertString';
-import checkHost from './util/checkHost';
-import includes from './util/includesString';
+"use strict";
 
-import isFQDN from './isFQDN';
-import isIP from './isIP';
-import merge from './util/merge';
-
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = isURL;
+var _assertString = _interopRequireDefault(require("./util/assertString"));
+var _checkHost = _interopRequireDefault(require("./util/checkHost"));
+var _includesString = _interopRequireDefault(require("./util/includesString"));
+var _isFQDN = _interopRequireDefault(require("./isFQDN"));
+var _isIP = _interopRequireDefault(require("./isIP"));
+var _merge = _interopRequireDefault(require("./util/merge"));
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 /*
 options for isURL method
 
@@ -34,8 +45,7 @@ max_allowed_length - if set, isURL will not allow URLs longer than the specified
 
 */
 
-
-const default_url_options = {
+var default_url_options = {
   protocols: ['http', 'https', 'ftp'],
   require_tld: true,
   require_protocol: false,
@@ -48,38 +58,30 @@ const default_url_options = {
   allow_fragments: true,
   allow_query_components: true,
   validate_length: true,
-  max_allowed_length: 2084,
+  max_allowed_length: 2084
 };
-
-const wrapped_ipv6 = /^\[([^\]]+)\](?::([0-9]+))?$/;
-
-export default function isURL(url, options) {
-  assertString(url);
+var wrapped_ipv6 = /^\[([^\]]+)\](?::([0-9]+))?$/;
+function isURL(url, options) {
+  (0, _assertString.default)(url);
   if (!url || /[\s<>]/.test(url)) {
     return false;
   }
   if (url.indexOf('mailto:') === 0) {
     return false;
   }
-  options = merge(options, default_url_options);
-
+  options = (0, _merge.default)(options, default_url_options);
   if (options.validate_length && url.length > options.max_allowed_length) {
     return false;
   }
-
-  if (!options.allow_fragments && includes(url, '#')) {
+  if (!options.allow_fragments && (0, _includesString.default)(url, '#')) {
     return false;
   }
-
-  if (!options.allow_query_components && (includes(url, '?') || includes(url, '&'))) {
+  if (!options.allow_query_components && ((0, _includesString.default)(url, '?') || (0, _includesString.default)(url, '&'))) {
     return false;
   }
-
-  let protocol, auth, host, hostname, port, port_str, split, ipv6;
-
+  var protocol, auth, host, hostname, port, port_str, split, ipv6;
   split = url.split('#');
   url = split.shift();
-
   split = url.split('?');
   url = split.shift();
 
@@ -87,13 +89,11 @@ export default function isURL(url, options) {
   // This correctly identifies schemes like `javascript:` which don't use `//`.
   // However, we need to be careful not to confuse authentication credentials (user:password@host)
   // with protocols. A colon before an @ symbol might be part of auth, not a protocol separator.
-  const protocol_match = url.match(/^([a-z][a-z0-9+\-.]*):/i);
-  let had_explicit_protocol = false;
-
-  const cleanUpProtocol = (potential_protocol) => {
+  var protocol_match = url.match(/^([a-z][a-z0-9+\-.]*):/i);
+  var had_explicit_protocol = false;
+  var cleanUpProtocol = function cleanUpProtocol(potential_protocol) {
     had_explicit_protocol = true;
     protocol = potential_protocol.toLowerCase();
-
     if (options.require_valid_protocol && options.protocols.indexOf(protocol) === -1) {
       // The identified protocol is not in the allowed list.
       return false;
@@ -102,35 +102,29 @@ export default function isURL(url, options) {
     // Remove the protocol from the URL string.
     return url.substring(protocol_match[0].length);
   };
-
   if (protocol_match) {
-    const potential_protocol = protocol_match[1];
-    const after_colon = url.substring(protocol_match[0].length);
+    var potential_protocol = protocol_match[1];
+    var after_colon = url.substring(protocol_match[0].length);
 
     // Check if what follows looks like authentication credentials (user:password@host)
     // rather than a protocol. This happens when:
     // 1. There's no `//` after the colon (protocols like `http://` have this)
     // 2. There's an `@` symbol before any `/`
     // 3. The part before `@` contains only valid auth characters (alphanumeric, -, _, ., %, :)
-    const starts_with_slashes = after_colon.slice(0, 2) === '//';
-
+    var starts_with_slashes = after_colon.slice(0, 2) === '//';
     if (!starts_with_slashes) {
-      const first_slash_position = after_colon.indexOf('/');
-      const before_slash = first_slash_position === -1
-        ? after_colon
-        : after_colon.substring(0, first_slash_position);
-      const at_position = before_slash.indexOf('@');
-
+      var first_slash_position = after_colon.indexOf('/');
+      var before_slash = first_slash_position === -1 ? after_colon : after_colon.substring(0, first_slash_position);
+      var at_position = before_slash.indexOf('@');
       if (at_position !== -1) {
-        const before_at = before_slash.substring(0, at_position);
-        const valid_auth_regex = /^[a-zA-Z0-9\-_.%:]*$/;
-        const is_valid_auth = valid_auth_regex.test(before_at);
+        var before_at = before_slash.substring(0, at_position);
+        var valid_auth_regex = /^[a-zA-Z0-9\-_.%:]*$/;
+        var is_valid_auth = valid_auth_regex.test(before_at);
 
         // Check if this contains URL-encoded content that could be malicious
         // For example: javascript:%61%6c%65%72%74%28%31%29@example.com
         // The encoded part decodes to: alert(1)
-        const has_encoded_content = /%[0-9a-fA-F]{2}/.test(before_at);
-
+        var has_encoded_content = /%[0-9a-fA-F]{2}/.test(before_at);
         if (is_valid_auth && !has_encoded_content) {
           // This looks like authentication (e.g., user:password@host), not a protocol
           if (options.require_protocol) {
@@ -142,7 +136,6 @@ export default function isURL(url, options) {
           // This looks like a malicious protocol (e.g., javascript:alert();@host)
           // or URL-encoded protocol handler (e.g., javascript:%61%6c%65%72%74%28%31%29@host)
           url = cleanUpProtocol(potential_protocol);
-
           if (url === false) {
             return false;
           }
@@ -151,8 +144,7 @@ export default function isURL(url, options) {
         // No @ symbol found. Check if this could be a port number instead of a protocol.
         // If what's after the colon is numeric (or starts with a digit and contains only
         // valid port characters until a path separator), it's likely hostname:port, not a protocol.
-        const looks_like_port = /^[0-9]/.test(after_colon);
-
+        var looks_like_port = /^[0-9]/.test(after_colon);
         if (looks_like_port) {
           // This looks like hostname:port, not a protocol
           if (options.require_protocol) {
@@ -162,7 +154,6 @@ export default function isURL(url, options) {
         } else {
           // This is definitely a protocol
           url = cleanUpProtocol(potential_protocol);
-
           if (url === false) {
             return false;
           }
@@ -171,7 +162,6 @@ export default function isURL(url, options) {
     } else {
       // Starts with '//', this is definitely a protocol like http://
       url = cleanUpProtocol(potential_protocol);
-
       if (url === false) {
         return false;
       }
@@ -187,21 +177,16 @@ export default function isURL(url, options) {
     if (!had_explicit_protocol && !options.allow_protocol_relative_urls) {
       return false;
     }
-
     url = url.slice(2);
   }
-
   if (url === '') {
     return false;
   }
-
   split = url.split('/');
   url = split.shift();
-
   if (url === '' && !options.require_host) {
     return true;
   }
-
   split = url.split('@');
   if (split.length > 1) {
     if (options.disallow_auth) {
@@ -214,16 +199,18 @@ export default function isURL(url, options) {
     if (auth.indexOf(':') >= 0 && auth.split(':').length > 2) {
       return false;
     }
-    const [user, password] = auth.split(':');
+    var _auth$split = auth.split(':'),
+      _auth$split2 = _slicedToArray(_auth$split, 2),
+      user = _auth$split2[0],
+      password = _auth$split2[1];
     if (user === '' && password === '') {
       return false;
     }
   }
   hostname = split.join('@');
-
   port_str = null;
   ipv6 = null;
-  const ipv6_match = hostname.match(wrapped_ipv6);
+  var ipv6_match = hostname.match(wrapped_ipv6);
   if (ipv6_match) {
     host = '';
     ipv6 = ipv6_match[1];
@@ -235,7 +222,6 @@ export default function isURL(url, options) {
       port_str = split.join(':');
     }
   }
-
   if (port_str !== null && port_str.length > 0) {
     port = parseInt(port_str, 10);
     if (!/^[0-9]+$/.test(port_str) || port <= 0 || port > 65535) {
@@ -244,24 +230,20 @@ export default function isURL(url, options) {
   } else if (options.require_port) {
     return false;
   }
-
   if (options.host_whitelist) {
-    return checkHost(host, options.host_whitelist);
+    return (0, _checkHost.default)(host, options.host_whitelist);
   }
-
   if (host === '' && !options.require_host) {
     return true;
   }
-
-  if (!isIP(host) && !isFQDN(host, options) && (!ipv6 || !isIP(ipv6, 6))) {
+  if (!(0, _isIP.default)(host) && !(0, _isFQDN.default)(host, options) && (!ipv6 || !(0, _isIP.default)(ipv6, 6))) {
     return false;
   }
-
   host = host || ipv6;
-
-  if (options.host_blacklist && checkHost(host, options.host_blacklist)) {
+  if (options.host_blacklist && (0, _checkHost.default)(host, options.host_blacklist)) {
     return false;
   }
-
   return true;
 }
+module.exports = exports.default;
+module.exports.default = exports.default;

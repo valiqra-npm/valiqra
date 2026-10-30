@@ -1,12 +1,17 @@
-import merge from './util/merge';
-import assertString from './util/assertString';
+"use strict";
 
-const upperCaseRegex = /^[A-Z]$/;
-const lowerCaseRegex = /^[a-z]$/;
-const numberRegex = /^[0-9]$/;
-const symbolRegex = /^[-#!$@£%^&*()_+|~=`{}\[\]:";'<>?,.\/\\ ]$/;
-
-const defaultOptions = {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = isStrongPassword;
+var _merge = _interopRequireDefault(require("./util/merge"));
+var _assertString = _interopRequireDefault(require("./util/assertString"));
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+var upperCaseRegex = /^[A-Z]$/;
+var lowerCaseRegex = /^[a-z]$/;
+var numberRegex = /^[0-9]$/;
+var symbolRegex = /^[-#!$@£%^&*()_+|~=`{}\[\]:";'<>?,.\/\\ ]$/;
+var defaultOptions = {
   minLength: 8,
   minLowercase: 1,
   minUppercase: 1,
@@ -18,16 +23,16 @@ const defaultOptions = {
   pointsForContainingLower: 10,
   pointsForContainingUpper: 10,
   pointsForContainingNumber: 10,
-  pointsForContainingSymbol: 10,
+  pointsForContainingSymbol: 10
 };
 
 /* Counts number of occurrences of each char in a string
  * could be moved to util/ ?
 */
 function countChars(str) {
-  let result = {};
-  Array.from(str).forEach((char) => {
-    let curVal = result[char];
+  var result = {};
+  Array.from(str).forEach(function (char) {
+    var curVal = result[char];
     if (curVal) {
       result[char] += 1;
     } else {
@@ -39,16 +44,16 @@ function countChars(str) {
 
 /* Return information about a password */
 function analyzePassword(password) {
-  let charMap = countChars(password);
-  let analysis = {
+  var charMap = countChars(password);
+  var analysis = {
     length: password.length,
     uniqueChars: Object.keys(charMap).length,
     uppercaseCount: 0,
     lowercaseCount: 0,
     numberCount: 0,
-    symbolCount: 0,
+    symbolCount: 0
   };
-  Object.keys(charMap).forEach((char) => {
+  Object.keys(charMap).forEach(function (char) {
     /* istanbul ignore else */
     if (upperCaseRegex.test(char)) {
       analysis.uppercaseCount += charMap[char];
@@ -62,9 +67,8 @@ function analyzePassword(password) {
   });
   return analysis;
 }
-
 function scorePassword(analysis, scoringOptions) {
-  let points = 0;
+  var points = 0;
   points += analysis.uniqueChars * scoringOptions.pointsPerUnique;
   points += (analysis.length - analysis.uniqueChars) * scoringOptions.pointsPerRepeat;
   if (analysis.lowercaseCount > 0) {
@@ -81,17 +85,15 @@ function scorePassword(analysis, scoringOptions) {
   }
   return points;
 }
-
-export default function isStrongPassword(str, options = null) {
-  assertString(str);
-  const analysis = analyzePassword(str);
-  options = merge(options || {}, defaultOptions);
+function isStrongPassword(str) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  (0, _assertString.default)(str);
+  var analysis = analyzePassword(str);
+  options = (0, _merge.default)(options || {}, defaultOptions);
   if (options.returnScore) {
     return scorePassword(analysis, options);
   }
-  return analysis.length >= options.minLength
-        && analysis.lowercaseCount >= options.minLowercase
-        && analysis.uppercaseCount >= options.minUppercase
-        && analysis.numberCount >= options.minNumbers
-        && analysis.symbolCount >= options.minSymbols;
+  return analysis.length >= options.minLength && analysis.lowercaseCount >= options.minLowercase && analysis.uppercaseCount >= options.minUppercase && analysis.numberCount >= options.minNumbers && analysis.symbolCount >= options.minSymbols;
 }
+module.exports = exports.default;
+module.exports.default = exports.default;

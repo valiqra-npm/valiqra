@@ -1,6 +1,12 @@
-import assertString from './util/assertString';
+"use strict";
 
-const isin = /^[A-Z]{2}[0-9A-Z]{9}[0-9]$/;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = isISIN;
+var _assertString = _interopRequireDefault(require("./util/assertString"));
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+var isin = /^[A-Z]{2}[0-9A-Z]{9}[0-9]$/;
 
 // this link details how the check digit is calculated:
 // https://www.isin.org/isin-format/. it is a little bit
@@ -9,26 +15,26 @@ const isin = /^[A-Z]{2}[0-9A-Z]{9}[0-9]$/;
 // each alpha character is handled as 2 characters within
 // the loop.
 
-export default function isISIN(str) {
-  assertString(str);
+function isISIN(str) {
+  (0, _assertString.default)(str);
   if (!isin.test(str)) {
     return false;
   }
-
-  let double = true;
-  let sum = 0;
+  var double = true;
+  var sum = 0;
   // convert values
-  for (let i = str.length - 2; i >= 0; i--) {
+  for (var i = str.length - 2; i >= 0; i--) {
     if (str[i] >= 'A' && str[i] <= 'Z') {
-      const value = str[i].charCodeAt(0) - 55;
-      const lo = value % 10;
-      const hi = Math.trunc(value / 10);
+      var value = str[i].charCodeAt(0) - 55;
+      var lo = value % 10;
+      var hi = Math.trunc(value / 10);
       // letters have two digits, so handle the low order
       // and high order digits separately.
-      for (const digit of [lo, hi]) {
+      for (var _i = 0, _arr = [lo, hi]; _i < _arr.length; _i++) {
+        var digit = _arr[_i];
         if (double) {
           if (digit >= 5) {
-            sum += 1 + ((digit - 5) * 2);
+            sum += 1 + (digit - 5) * 2;
           } else {
             sum += digit * 2;
           }
@@ -38,21 +44,21 @@ export default function isISIN(str) {
         double = !double;
       }
     } else {
-      const digit = str[i].charCodeAt(0) - '0'.charCodeAt(0);
+      var _digit = str[i].charCodeAt(0) - '0'.charCodeAt(0);
       if (double) {
-        if (digit >= 5) {
-          sum += 1 + ((digit - 5) * 2);
+        if (_digit >= 5) {
+          sum += 1 + (_digit - 5) * 2;
         } else {
-          sum += digit * 2;
+          sum += _digit * 2;
         }
       } else {
-        sum += digit;
+        sum += _digit;
       }
       double = !double;
     }
   }
-
-  const check = (Math.trunc(((sum + 9) / 10)) * 10) - sum;
-
+  var check = Math.trunc((sum + 9) / 10) * 10 - sum;
   return +str[str.length - 1] === check;
 }
+module.exports = exports.default;
+module.exports.default = exports.default;

@@ -1,20 +1,27 @@
-import merge from './util/merge';
-import assertString from './util/assertString';
+"use strict";
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = isCurrency;
+var _merge = _interopRequireDefault(require("./util/merge"));
+var _assertString = _interopRequireDefault(require("./util/assertString"));
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 function currencyRegex(options) {
-  let decimal_digits = `\\d{${options.digits_after_decimal[0]}}`;
-  options.digits_after_decimal.forEach((digit, index) => { if (index !== 0) decimal_digits = `${decimal_digits}|\\d{${digit}}`; });
-
-  const symbol =
-    `(${options.symbol.replace(/\W/, m => `\\${m}`)})${(options.require_symbol ? '' : '?')}`,
+  var decimal_digits = "\\d{".concat(options.digits_after_decimal[0], "}");
+  options.digits_after_decimal.forEach(function (digit, index) {
+    if (index !== 0) decimal_digits = "".concat(decimal_digits, "|\\d{").concat(digit, "}");
+  });
+  var symbol = "(".concat(options.symbol.replace(/\W/, function (m) {
+      return "\\".concat(m);
+    }), ")").concat(options.require_symbol ? '' : '?'),
     negative = '-?',
     whole_dollar_amount_without_sep = '[1-9]\\d*',
-    whole_dollar_amount_with_sep = `[1-9]\\d{0,2}(\\${options.thousands_separator}\\d{3})*`,
-    valid_whole_dollar_amounts = [
-      '0', whole_dollar_amount_without_sep, whole_dollar_amount_with_sep],
-    whole_dollar_amount = `(${valid_whole_dollar_amounts.join('|')})?`,
-    decimal_amount = `(\\${options.decimal_separator}(${decimal_digits}))${options.require_decimal ? '' : '?'}`;
-  let pattern = whole_dollar_amount + (options.allow_decimal || options.require_decimal ? decimal_amount : '');
+    whole_dollar_amount_with_sep = "[1-9]\\d{0,2}(\\".concat(options.thousands_separator, "\\d{3})*"),
+    valid_whole_dollar_amounts = ['0', whole_dollar_amount_without_sep, whole_dollar_amount_with_sep],
+    whole_dollar_amount = "(".concat(valid_whole_dollar_amounts.join('|'), ")?"),
+    decimal_amount = "(\\".concat(options.decimal_separator, "(").concat(decimal_digits, "))").concat(options.require_decimal ? '' : '?');
+  var pattern = whole_dollar_amount + (options.allow_decimal || options.require_decimal ? decimal_amount : '');
 
   // default is negative sign before symbol, but there are two other options (besides parens)
   if (options.allow_negatives && !options.parens_for_negatives) {
@@ -27,22 +34,20 @@ function currencyRegex(options) {
 
   // South African Rand, for example, uses R 123 (space) and R-123 (no space)
   if (options.allow_negative_sign_placeholder) {
-    pattern = `( (?!\\-))?${pattern}`;
+    pattern = "( (?!\\-))?".concat(pattern);
   } else if (options.allow_space_after_symbol) {
-    pattern = ` ?${pattern}`;
+    pattern = " ?".concat(pattern);
   } else if (options.allow_space_after_digits) {
     pattern += '( (?!$))?';
   }
-
   if (options.symbol_after_digits) {
     pattern += symbol;
   } else {
     pattern = symbol + pattern;
   }
-
   if (options.allow_negatives) {
     if (options.parens_for_negatives) {
-      pattern = `(\\(${pattern}\\)|${pattern})`;
+      pattern = "(\\(".concat(pattern, "\\)|").concat(pattern, ")");
     } else if (!(options.negative_sign_before_digits || options.negative_sign_after_digits)) {
       pattern = negative + pattern;
     }
@@ -50,11 +55,9 @@ function currencyRegex(options) {
 
   // ensure there's a dollar and/or decimal amount, and that
   // it doesn't start with a space or a negative sign followed by a space
-  return new RegExp(`^(?!-? )(?=.*\\d)${pattern}$`);
+  return new RegExp("^(?!-? )(?=.*\\d)".concat(pattern, "$"));
 }
-
-
-const default_currency_options = {
+var default_currency_options = {
   symbol: '$',
   require_symbol: false,
   allow_space_after_symbol: false,
@@ -69,11 +72,12 @@ const default_currency_options = {
   allow_decimal: true,
   require_decimal: false,
   digits_after_decimal: [2],
-  allow_space_after_digits: false,
+  allow_space_after_digits: false
 };
-
-export default function isCurrency(str, options) {
-  assertString(str);
-  options = merge(options, default_currency_options);
+function isCurrency(str, options) {
+  (0, _assertString.default)(str);
+  options = (0, _merge.default)(options, default_currency_options);
   return currencyRegex(options).test(str);
 }
+module.exports = exports.default;
+module.exports.default = exports.default;

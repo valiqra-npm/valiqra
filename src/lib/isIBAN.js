@@ -1,12 +1,19 @@
-import assertString from './util/assertString';
-import includes from './util/includesArray';
+"use strict";
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = isIBAN;
+exports.locales = void 0;
+var _assertString = _interopRequireDefault(require("./util/assertString"));
+var _includesArray = _interopRequireDefault(require("./util/includesArray"));
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 /**
  * List of country codes with
  * corresponding IBAN regular expression
  * Reference: https://en.wikipedia.org/wiki/International_Bank_Account_Number
  */
-const ibanRegexThroughCountryCode = {
+var ibanRegexThroughCountryCode = {
   AD: /^(AD[0-9]{2})\d{8}[A-Z0-9]{12}$/,
   AE: /^(AE[0-9]{2})\d{3}\d{16}$/,
   AL: /^(AL[0-9]{2})\d{8}[A-Z0-9]{16}$/,
@@ -86,7 +93,7 @@ const ibanRegexThroughCountryCode = {
   UA: /^(UA[0-9]{2})\d{6}[A-Z0-9]{19}$/,
   VA: /^(VA[0-9]{2})\d{18}$/,
   VG: /^(VG[0-9]{2})[A-Z]{4}\d{16}$/,
-  XK: /^(XK[0-9]{2})\d{16}$/,
+  XK: /^(XK[0-9]{2})\d{16}$/
 };
 
 /**
@@ -98,9 +105,9 @@ const ibanRegexThroughCountryCode = {
  */
 
 function hasOnlyValidCountryCodes(countryCodeArray) {
-  const countryCodeArrayFilteredWithObjectIbanCode = countryCodeArray
-    .filter(countryCode => !(countryCode in ibanRegexThroughCountryCode));
-
+  var countryCodeArrayFilteredWithObjectIbanCode = countryCodeArray.filter(function (countryCode) {
+    return !(countryCode in ibanRegexThroughCountryCode);
+  });
   return countryCodeArrayFilteredWithObjectIbanCode.length === 0;
 }
 
@@ -118,33 +125,25 @@ function hasOnlyValidCountryCodes(countryCodeArray) {
  */
 function hasValidIbanFormat(str, options) {
   // Strip white spaces and hyphens
-  const strippedStr = str.replace(/[\s\-]+/gi, '').toUpperCase();
-  const isoCountryCode = strippedStr.slice(0, 2).toUpperCase();
-
-  const isoCountryCodeInIbanRegexCodeObject = isoCountryCode in ibanRegexThroughCountryCode;
-
+  var strippedStr = str.replace(/[\s\-]+/gi, '').toUpperCase();
+  var isoCountryCode = strippedStr.slice(0, 2).toUpperCase();
+  var isoCountryCodeInIbanRegexCodeObject = isoCountryCode in ibanRegexThroughCountryCode;
   if (options.whitelist) {
     if (!hasOnlyValidCountryCodes(options.whitelist)) {
       return false;
     }
-
-    const isoCountryCodeInWhiteList = includes(options.whitelist, isoCountryCode);
-
+    var isoCountryCodeInWhiteList = (0, _includesArray.default)(options.whitelist, isoCountryCode);
     if (!isoCountryCodeInWhiteList) {
       return false;
     }
   }
-
   if (options.blacklist) {
-    const isoCountryCodeInBlackList = includes(options.blacklist, isoCountryCode);
-
+    var isoCountryCodeInBlackList = (0, _includesArray.default)(options.blacklist, isoCountryCode);
     if (isoCountryCodeInBlackList) {
       return false;
     }
   }
-
-  return (isoCountryCodeInIbanRegexCodeObject) &&
-    ibanRegexThroughCountryCode[isoCountryCode].test(strippedStr);
+  return isoCountryCodeInIbanRegexCodeObject && ibanRegexThroughCountryCode[isoCountryCode].test(strippedStr);
 }
 
 /**
@@ -161,20 +160,19 @@ function hasValidIbanFormat(str, options) {
    * @return {boolean}
    */
 function hasValidIbanChecksum(str) {
-  const strippedStr = str.replace(/[^A-Z0-9]+/gi, '').toUpperCase(); // Keep only digits and A-Z latin alphabetic
-  const rearranged = strippedStr.slice(4) + strippedStr.slice(0, 4);
-  const alphaCapsReplacedWithDigits = rearranged.replace(/[A-Z]/g, char => char.charCodeAt(0) - 55);
-
-  const remainder = alphaCapsReplacedWithDigits.match(/\d{1,7}/g)
-    .reduce((acc, value) => Number(acc + value) % 97, '');
-
+  var strippedStr = str.replace(/[^A-Z0-9]+/gi, '').toUpperCase(); // Keep only digits and A-Z latin alphabetic
+  var rearranged = strippedStr.slice(4) + strippedStr.slice(0, 4);
+  var alphaCapsReplacedWithDigits = rearranged.replace(/[A-Z]/g, function (char) {
+    return char.charCodeAt(0) - 55;
+  });
+  var remainder = alphaCapsReplacedWithDigits.match(/\d{1,7}/g).reduce(function (acc, value) {
+    return Number(acc + value) % 97;
+  }, '');
   return remainder === 1;
 }
-
-export default function isIBAN(str, options = {}) {
-  assertString(str);
-
+function isIBAN(str) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  (0, _assertString.default)(str);
   return hasValidIbanFormat(str, options) && hasValidIbanChecksum(str);
 }
-
-export const locales = Object.keys(ibanRegexThroughCountryCode);
+var locales = exports.locales = Object.keys(ibanRegexThroughCountryCode);

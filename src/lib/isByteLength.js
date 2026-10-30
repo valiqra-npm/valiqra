@@ -1,41 +1,27 @@
-import assertString from './util/assertString';
+"use strict";
 
-function utf8ByteLength(str) {
-  let length = 0;
-
-  for (let i = 0; i < str.length; i++) {
-    const code = str.charCodeAt(i);
-
-    if (code <= 0x7F) {
-      length += 1;
-    } else if (code <= 0x7FF) {
-      length += 2;
-    } else if (code >= 0xD800 && code <= 0xDBFF &&
-      i + 1 < str.length &&
-      str.charCodeAt(i + 1) >= 0xDC00 && str.charCodeAt(i + 1) <= 0xDFFF) {
-      length += 4;
-      i += 1;
-    } else {
-      // UTF-8 encoders replace unpaired surrogates with U+FFFD (three bytes).
-      length += 3;
-    }
-  }
-
-  return length;
-}
-
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = isByteLength;
+var _assertString = _interopRequireDefault(require("./util/assertString"));
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 /* eslint-disable prefer-rest-params */
-export default function isByteLength(str, options) {
-  assertString(str);
-  let min;
-  let max;
-  if (typeof (options) === 'object') {
+function isByteLength(str, options) {
+  (0, _assertString.default)(str);
+  var min;
+  var max;
+  if (_typeof(options) === 'object') {
     min = options.min || 0;
     max = options.max;
-  } else { // backwards compatibility: isByteLength(str, min [, max])
+  } else {
+    // backwards compatibility: isByteLength(str, min [, max])
     min = arguments[1];
     max = arguments[2];
   }
-  const len = utf8ByteLength(str);
+  var len = encodeURI(str).split(/%..|./).length - 1;
   return len >= min && (typeof max === 'undefined' || len <= max);
 }
+module.exports = exports.default;
+module.exports.default = exports.default;

@@ -1,14 +1,19 @@
-import assertString from './util/assertString';
+"use strict";
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = isPostalCode;
+exports.locales = void 0;
+var _assertString = _interopRequireDefault(require("./util/assertString"));
+function _interopRequireDefault(e) { return e && e.__esModule ? e : { default: e }; }
 // common patterns
-const threeDigit = /^\d{3}$/;
-const fourDigit = /^\d{4}$/;
-const fiveDigit = /^\d{5}$/;
-const sixDigit = /^\d{6}$/;
-
-const patterns = {
+var threeDigit = /^\d{3}$/;
+var fourDigit = /^\d{4}$/;
+var fiveDigit = /^\d{5}$/;
+var sixDigit = /^\d{6}$/;
+var patterns = {
   AD: /^AD\d{3}$/,
-  AR: /^([A-HJ-NP-Z]\d{4}[A-Z]{3}|[1-9]\d{3})$/i,
   AT: fourDigit,
   AU: fourDigit,
   AZ: /^AZ\d{4}$/,
@@ -43,7 +48,6 @@ const patterns = {
   IR: /^(?!(\d)\1{3})[13-9]{4}[1346-9][013-9]{5}$/,
   IS: threeDigit,
   IT: fiveDigit,
-  JO: fiveDigit,
   JP: /^\d{3}\-\d{4}$/,
   KE: fiveDigit,
   KR: /^(\d{5}|\d{6})$/,
@@ -79,21 +83,19 @@ const patterns = {
   UA: fiveDigit,
   US: /^\d{5}(-\d{4})?$/,
   ZA: fourDigit,
-  ZM: fiveDigit,
+  ZM: fiveDigit
 };
-
-export const locales = Object.keys(patterns);
-
-export default function isPostalCode(str, locale) {
-  assertString(str);
+var locales = exports.locales = Object.keys(patterns);
+function isPostalCode(str, locale) {
+  (0, _assertString.default)(str);
   if (locale in patterns) {
     return patterns[locale].test(str);
   } else if (locale === 'any') {
-    for (const key in patterns) {
+    for (var key in patterns) {
       // https://github.com/gotwarlost/istanbul/blob/master/ignoring-code-for-coverage.md#ignoring-code-for-coverage-purposes
       // istanbul ignore else
       if (patterns.hasOwnProperty(key)) {
-        const pattern = patterns[key];
+        var pattern = patterns[key];
         if (pattern.test(str)) {
           return true;
         }
@@ -101,5 +103,5 @@ export default function isPostalCode(str, locale) {
     }
     return false;
   }
-  throw new Error(`Invalid locale '${locale}'`);
+  throw new Error("Invalid locale '".concat(locale, "'"));
 }
